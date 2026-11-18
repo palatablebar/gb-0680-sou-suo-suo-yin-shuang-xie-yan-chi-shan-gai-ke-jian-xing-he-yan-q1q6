@@ -20,10 +20,11 @@ docker compose exec -T app pytest -q
 - 5. 延迟闸门：`/latency`，`/api/latency`。
 - 6. 双写对账：`/parity`，`/api/parity`。
 - 7. 回补归档：`/backfills`，`/api/backfills`。
+- 8. 合规下架裁决：`/takedowns`，`/api/takedowns`（`/api/takedowns/settle` 形成唯一结论，`/api/takedowns/<id>/credential` 导出凭据）。
 
 ## 核心规则
 
-按源版本重建目标可见状态，删除墓碑拦截迟到旧写入；延迟与缺失分开定责。
+按源版本重建目标可见状态，删除墓碑拦截迟到旧写入；延迟与缺失分开定责。合规下架以最新探针判定每个入口当前是否返回正文，全部单元在时限内无正文才形成唯一“已下架”结论并签发一份凭据；回执不阻断结论，终局不可变，重试同工单不新增结论或凭据。
 
 ## 演示
 

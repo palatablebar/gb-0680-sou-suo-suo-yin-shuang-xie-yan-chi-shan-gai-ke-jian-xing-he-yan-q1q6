@@ -46,7 +46,8 @@ def create_app():
         run=store.get(run_id)
         return application.response_class(build_archive(run),mimetype="text/csv",headers={"Content-Disposition":'attachment; filename="evidence.csv"'})
     for index,(slug,title) in enumerate(MODULES,1):
-        module=importlib.import_module(f"app.modules.m{index}_{slug}.handler")
+        module_path="app.modules.m8_takedowns.handler" if slug=="takedowns" else f"app.modules.m{index}_{slug}.handler"
+        module=importlib.import_module(module_path)
         application.register_blueprint(module.bp)
     register_pages(application)
     return application

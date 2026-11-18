@@ -1,7 +1,9 @@
 from flask import render_template
-from app.config import MODULES,TITLE,SHORT
+from app.config import MODULES,TITLE,SHORT,DATA_DIR
 from app.pipeline import execute,load_sample
-from app import store
+from app import store,takedown_store
+from app.modules.m8_takedowns.handler import load_sample_ticket
+from app.modules.m8_takedowns.rules import evaluate as evaluate_takedown
 def register_pages(app):
     def page(index):
         run=store.latest() or execute(load_sample("dirty.csv"))
@@ -13,4 +15,10 @@ def register_pages(app):
         return render_template(f"m{index+1}.html",title=TITLE,short=SHORT,modules=MODULES,index=index,run=run,stage=stage,rows=rows,columns=columns[:12],history=store.history(),labels=labels)
     app.add_url_rule("/",view_func=lambda:page(4))
     for index,(slug,name) in enumerate(MODULES):
+        if index==7: continue
         app.add_url_rule("/"+slug,endpoint="page_"+slug,view_func=lambda index=index:page(index))
+    def takedown_page():
+        ticket=evaluate_takedown(load_sample_ticket())
+        return render_template("takedown.html",title=TITLE,short=SHORT,modules=MODULES,index=7,
+            ticket=ticket,history=takedown_store.history(DATA_DIR))
+    app.add_url_rule("/takedowns",endpoint="page_takedowns",view_func=takedown_page)
